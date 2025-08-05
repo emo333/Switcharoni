@@ -1,59 +1,12 @@
 ﻿namespace Switcharoni
 {
-
-
-
     public class Program
     {
         private static async Task Main(string[] args)
         {
+            await Helpers.DisplayBanner(args);
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("""
-
-
-
-          ########################################################
-          ##                                                    ##
-          ##                    SWITCHARONI                     ##
-          ##                                                    ##
-          ##             ___________________________            ##
-          ##            /                          /|           ##
-          ##           /   by: M. Wilson 8/2025   / |           ##
-          ##          /                          /  |           ##
-          ##         /__________________________/  /            ##
-          ##         |  [ ] [ ] [ ] [ ] [ ] [ ] | /             ##
-          ##         |__________________________|/              ##
-          ##                                                    ##
-          ##                                                    ##
-          ##    - Enter the Management IP {###.###.###.###}     ##
-          ##       of the Cisco Switch that you want to get     ##
-          ##       all of the IP addresses of hosts connected   ##
-          ##       switch ports.                                ##
-          ##                                                    ##
-          ##    - You will be prompted for the ssh USERNAME     ##
-          ##       and PASSWORD for the switch.                 ##
-          ##                                                    ##
-          ########################################################
-
-
-        """);
-            Console.ResetColor();
-            if (args.Length > 0 && args[0] == "help")
-            {
-                Console.WriteLine("Usage: Switcharoni [options]");
-                Console.WriteLine("Options:");
-                Console.WriteLine("  help       Show this help message");
-                Console.WriteLine("  ip         Specify the switch IP address");
-                Console.WriteLine("  username   Specify the SSH username");
-                Console.WriteLine("  password   Specify the SSH password");
-                return;
-            }
-
-
-
-
-
-
+            
             List<string> ipAddresses =
             [
                 "4.2.2.2",
@@ -68,9 +21,6 @@
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine();
-
-
-
 
 
             List<string> hostsToPing =
@@ -89,21 +39,18 @@
             ];
             await RunPings.Run(hostsToPing); // Run the pinging of hosts in parallel
 
-            Console.ReadLine();
+            Console.ReadLine(); // temp for testing
 
 
-
-
-
-            var _switchip = GetSwitchIP(); //"172.16.102.6";
-            var _username = GetUsername(); // "admin";
+            var _switchip = GetSwitchIP(); //e.g. "172.16.102.6"
+            var _username = GetUsername(); //e.g. "admin"
             var _password = GetPassword();
             List<string> _commandsToRunOnSwitch =
             [
                 "show interface status | include (connected)",
-            "show ip arp",
-            "show mac address-table dynamic", //dynamic
-            ""
+                "show ip arp",
+                "show mac address-table dynamic", //dynamic
+                ""  // TODO: remove this line ??
             ];
             SwitchManager switchManager = new(_switchip, _username, _password);
             await switchManager.RunCommandsAsync(_commandsToRunOnSwitch);
@@ -112,7 +59,7 @@
             //    if (mac.Port.Length > 2) if(mac.Port.Substring(mac.Port.Length - 2) == "\r") mac.Port = mac.Port.Substring(0, mac.Port.Length - 2);
             //}
 
-            // Merge the Lists into a single List for display and export
+            // Merge the Lists into a single List for display TODO: and export
             foreach (var ipAddr in switchManager.IpAddresses)
             {
                 var swInt = switchManager.SwitchInterfaces.FirstOrDefault(i => i.Mac == ipAddr.Mac);
@@ -122,7 +69,7 @@
                 }
                 else
                 {
-                    //interf.Ip = "screwed up in 1";
+                    // TODO: handle IP address missing in IpAddresses
                 }
             }
 
@@ -151,12 +98,11 @@
                     swInt.Mac = "NOT IN MAT";
                 }
             }
-            var switchPortInfo = switchManager.IpAddresses;
+            //var switchPortInfo = switchManager.IpAddresses;
 
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            switchManager.SwitchInterfaces.ForEach(i => Console.WriteLine($"Interface: {i.InterfaceName} IP Address: {i.Ip} MAC: {i.Mac}"));
-            Console.WriteLine("\n\n");
+            await Helpers.DisplayInterfacesResultToConsole(switchManager.SwitchInterfaces);
+
+
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             switchManager.IpAddresses.OrderBy(i => i.Port).ToList().ForEach(i => Console.WriteLine($" PORT: {i.Port}  |  IP Address: {i.Ip}  |  MAC: {i.Mac}"));
             Console.WriteLine("\n\n");
