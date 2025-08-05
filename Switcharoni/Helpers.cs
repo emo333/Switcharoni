@@ -13,11 +13,36 @@ namespace Switcharoni
         {
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("[[[[[  SWITCH PORTS  ]]]]]");
             switchinterfaces.ForEach(i => Console.WriteLine($"Interface: {i.InterfaceName} IP Address: {i.Ip} MAC: {i.Mac}"));
             Console.WriteLine("\n\n");
 
             return Task.CompletedTask;
         }
+
+
+        internal static Task DisplayIpAddressesResultToConsole(List<SwitchManager.IpAddress> ipaddresses)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("[[[[[  IP ADDRESSES  ]]]]]");
+            ipaddresses.OrderBy(i => i.Port).ToList().ForEach(i => Console.WriteLine($" PORT: {i.Port}  |  IP Address: {i.Ip}  |  MAC: {i.Mac}"));
+            Console.WriteLine("\n\n");
+
+            return Task.CompletedTask;
+        }
+
+
+        internal static Task DisplayMacAddressesResultToConsole(List<SwitchManager.MacAddress> macaddresses)
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("[[[[[  MAC ADDRESSES  ]]]]]");
+            macaddresses.ForEach(i => Console.WriteLine($"MAC: {i.Mac} Port: {i.Port}"));
+            Console.WriteLine("\n\n");
+
+            return Task.CompletedTask;
+        }
+
 
 
         internal static Task DisplayBanner(string[] args)
